@@ -2,4 +2,4 @@
 
 Julia code for the course by Richard McElreath taken in ["2022"](https://github.com/rmcelreath/stat_rethinking_2022).
 
-During lectures coding exercises are in R, while this repository contains Julia's code tested with Julia LTS v1.6.5 and saved as Pluto notebooks.
+During lectures coding exercises are in R, while this repository contains Julia's code tested with Julia LTS v1.6.5 and saved as Pluto notebooks and published at ["https://mashu.github.io/StatisticalRethinking2022/"](https://mashu.github.io/StatisticalRethinking2022/).
