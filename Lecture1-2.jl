@@ -132,16 +132,16 @@ end
 
 # ╔═╡ 25d5b189-364d-46d0-8b9d-24acbaf82157
 #2
-let
-	p_grid = collect(0:0.001:1)
-	x = 4    # Number of successes we are interested in
-	n = 4+11 # Number of trials
-	local p  # Probability of success
-	prob_data = [pdf(Binomial(n, p), x) for p in p_grid]
-	prob_uninfprior = [p < 0.5 ? 0 : 1 for p in p_grid]
-	posterior_uninfprior = prob_data .* prob_uninfprior
-	posterior_uninfprior = posterior_uninfprior ./ sum(posterior_uninfprior)
-	scatter(p_grid,posterior_uninfprior, title="Posterior probability")
+begin
+	hw_p_grid = collect(0:0.001:1)
+	hw_x = 4    # Number of successes we are interested in
+	hw_n = 4+2 # Number of trials
+	local hw_p  # Probability of success
+	hw_prob_data = [pdf(Binomial(hw_n, p), hw_x) for p in hw_p_grid]
+	hw_prob_prior = [p < 0.5 ? 0 : 1 for p in hw_p_grid]
+	hw_posterior = hw_prob_data .* hw_prob_prior
+	hw_posterior = hw_posterior ./ sum(hw_posterior)
+	scatter(hw_p_grid, hw_posterior, title="Posterior probability")
 end
 
 # ╔═╡ e130de89-9486-45c2-aca5-c39eb4d3d7a0
@@ -149,7 +149,22 @@ end
 # 89th percentile
 sort(posterior_uninfprior)[Int(round((length(posterior_uninfprior)+1) * (89/100), digits=0))]
 
-# ╔═╡ a73fa697-3a45-40a1-b917-96d778739161
+# ╔═╡ cf6b6a0b-aa16-4a2d-945a-f1ea22fb9550
+quantile(hw_posterior, 0.89)
+
+# ╔═╡ f9090e56-b6e7-4f75-a629-5937f82395ce
+
+
+# ╔═╡ 1f391ed3-750c-4458-a27b-7870ef7e53ec
+
+
+# ╔═╡ d39dbbba-d9f2-4f78-bb00-4611a6f16412
+
+
+# ╔═╡ f434daf6-fc2c-4a1c-8f26-2298f35ca80c
+
+
+# ╔═╡ 22cdf20b-beec-4d5e-b019-ccf1f5394110
 
 
 # ╔═╡ Cell order:
@@ -167,4 +182,9 @@ sort(posterior_uninfprior)[Int(round((length(posterior_uninfprior)+1) * (89/100)
 # ╠═77bbf84d-9a11-4249-b61f-8f10c7d3f50b
 # ╠═25d5b189-364d-46d0-8b9d-24acbaf82157
 # ╠═e130de89-9486-45c2-aca5-c39eb4d3d7a0
-# ╠═a73fa697-3a45-40a1-b917-96d778739161
+# ╠═cf6b6a0b-aa16-4a2d-945a-f1ea22fb9550
+# ╠═f9090e56-b6e7-4f75-a629-5937f82395ce
+# ╠═1f391ed3-750c-4458-a27b-7870ef7e53ec
+# ╠═d39dbbba-d9f2-4f78-bb00-4611a6f16412
+# ╠═f434daf6-fc2c-4a1c-8f26-2298f35ca80c
+# ╠═22cdf20b-beec-4d5e-b019-ccf1f5394110
