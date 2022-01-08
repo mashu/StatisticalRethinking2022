@@ -25,7 +25,7 @@ begin
         Pkg.PackageSpec(name="StatsBase"),
 		Pkg.PackageSpec(name="StatsPlots"),
 		Pkg.PackageSpec(name="Turing"),
-		Pkg.PackageSpec(name="Pluto"),
+		Pkg.PackageSpec(name="PlutoUI"),
     ])
 
     using Plots
@@ -103,7 +103,7 @@ end
 # ╔═╡ 1278c7d4-f5db-401c-923a-fdef994d8e36
 begin
 	p = rand(samples_uninfprior)
-	scatter(1:n,pdf.(Binomial(n,p)),color=:green,title="Single predictive distribution for p=$p")
+	scatter(1:n, pdf.(Binomial(n,p)),color=:green,title="Single predictive distribution for p=$p")
 end
 
 # ╔═╡ b85c0a56-fab5-40d6-a740-601b500e9fd7
@@ -148,11 +148,11 @@ the unbiased posterior distribution of the true proportion of water.
 # ╔═╡ 77bbf84d-9a11-4249-b61f-8f10c7d3f50b
 # 1
 let
-	p_grid = collect(0:0.001:1)
-	x = 4    # Number of successes we are interested in
-	n = 4+11 # Number of trials
+	hw_p_grid = collect(0:0.001:1)
+	hw_x = 4    # Number of successes we are interested in
+	hw_n = 4+11 # Number of trials
 	local p  # Probability of success
-	prob_data = [pdf(Binomial(n, p), x) for p in p_grid]
+	prob_data = [pdf(Binomial(hw_n, p), hw_x) for p in hw_p_grid]
 	prob_uninfprior = ones(1001)
 	posterior_uninfprior = prob_data .* prob_uninfprior
 	posterior_uninfprior = posterior_uninfprior ./ sum(posterior_uninfprior)
@@ -169,12 +169,16 @@ begin
 	hw_prob_data = [pdf(Binomial(hw_n, p), hw_x) for p in hw_p_grid]
 	hw_prob_prior = [p < 0.5 ? 0 : 1 for p in hw_p_grid]
 	hw_posterior = hw_prob_data .* hw_prob_prior
+	hw_prop_quantile = quantile(hw_posterior, 0.89)
 	hw_posterior = hw_posterior ./ sum(hw_posterior)
 	scatter(hw_p_grid, hw_posterior, title="Posterior probability")
 end
 
 # ╔═╡ cf6b6a0b-aa16-4a2d-945a-f1ea22fb9550
-quantile(hw_posterior, 0.89)
+hw_prop_quantile
+
+# ╔═╡ f5a8b005-9f3b-4be2-813c-966df2b3e6d6
+
 
 # ╔═╡ Cell order:
 # ╠═4178b5c3-0eab-461c-827f-a3fac25eae10
@@ -195,3 +199,4 @@ quantile(hw_posterior, 0.89)
 # ╠═77bbf84d-9a11-4249-b61f-8f10c7d3f50b
 # ╠═25d5b189-364d-46d0-8b9d-24acbaf82157
 # ╠═cf6b6a0b-aa16-4a2d-945a-f1ea22fb9550
+# ╠═f5a8b005-9f3b-4be2-813c-966df2b3e6d6
