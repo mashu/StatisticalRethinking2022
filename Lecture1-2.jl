@@ -4,6 +4,16 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
 # ╔═╡ 91d393ae-6e1c-11ec-0b79-29498ea4283d
 begin
     import Pkg
@@ -15,12 +25,14 @@ begin
         Pkg.PackageSpec(name="StatsBase"),
 		Pkg.PackageSpec(name="StatsPlots"),
 		Pkg.PackageSpec(name="Turing"),
+		Pkg.PackageSpec(name="Pluto"),
     ])
 
     using Plots
 	using StatsBase
 	using StatsPlots
 	using Turing
+	using PlutoUI
 end
 
 
@@ -29,11 +41,15 @@ md"""
 # Lectures 1-2
 """
 
+# ╔═╡ ba7d3205-b77c-46e6-b055-6c0c48a783a5
+@bind x Slider(1:10, default=6, show_value=true)  # Number of successes
+
+# ╔═╡ ff97beeb-deea-4937-876b-a19604299099
+@bind n Slider(1:10, default=9, show_value=true) # Number of trials
+
 # ╔═╡ 137bc5ea-ae97-491e-8c1a-66be074752cc
-begin
+let
 	p_grid = collect(0:0.001:1)
-	x = 6 # Number of success we are chosing
-	n = 9 # Number of trials
 	local p # Probability of success
 	prob_data = [pdf(Binomial(n, p), x) for p in p_grid]
 	prob_uninfprior = ones(1001)
@@ -42,28 +58,41 @@ begin
 	scatter(p_grid, posterior_uninfprior)
 end
 
+# ╔═╡ 43eab4cb-701e-491e-87c2-45225be9eeed
+@bind a Slider(1:10, default=3, show_value=true)
+
+# ╔═╡ 220380ea-ffe8-4b8a-aaa7-dff285b27cdc
+@bind b Slider(1:10, default=1, show_value=true)
+
 # ╔═╡ 0fba150d-9d96-45ae-8f37-bdfd989ebd41
 begin
+	p_grid = collect(0:0.001:1)
+	local p # Probability of success
+	prob_data = [pdf(Binomial(n, p), x) for p in p_grid]
+	prob_uninfprior = ones(1001)
+	posterior_uninfprior = prob_data .* prob_uninfprior
+	posterior_uninfprior = posterior_uninfprior ./ sum(posterior_uninfprior)
+	scatter(p_grid, posterior_uninfprior)
 	# Different non-uniform prior Beta
-	prob_betaprior = [pdf(Beta(3,1), p) for p in p_grid]
+	prob_betaprior = [pdf(Beta(a, b), p) for p in p_grid]
 	posterior_betaprior = prob_data .* prob_betaprior
 	posterior_betaprior = posterior_betaprior ./ sum(posterior_betaprior)
 	
 	scatter!(p_grid, posterior_betaprior, color=:blue)
 end
 
+# ╔═╡ 2a9c23a1-7863-4cad-9b18-9b1acdfe6e52
+@bind nsamples Slider(1:1000:10001, default=1000, show_value=true)
+
 # ╔═╡ b46dd645-b71f-4617-a55a-46ad0a5808f4
+# Sample from posterior
 begin
-	# Sample from posterior
-	samples_uninfprior = [sample(p_grid, Weights(posterior_uninfprior)) for i in 1:1000]
-	samples_betaprior = [sample(p_grid, Weights(posterior_betaprior)) for i in 1:1000]
+	samples_uninfprior = [sample(p_grid, Weights(posterior_uninfprior)) for i in 1:nsamples]
+	samples_betaprior = [sample(p_grid, Weights(posterior_betaprior)) for i in 1:nsamples]
 end
 
 # ╔═╡ ec5ac06d-4a16-4233-891c-492be23745ba
 scatter(p_grid, samples_uninfprior, title="Sampled probabilities from posterior distribution")
-
-# ╔═╡ 4e4fca93-2bd5-4aa0-9acf-a5a930b431c8
-
 
 # ╔═╡ 6067730e-f2cd-4092-aebd-1befa909f68e
 begin
@@ -134,9 +163,9 @@ end
 #2
 begin
 	hw_p_grid = collect(0:0.001:1)
-	hw_x = 4    # Number of successes we are interested in
-	hw_n = 4+2 # Number of trials
-	local hw_p  # Probability of success
+	hw_x = 4       # Number of successes we are interested in
+	hw_n = hw_x+2  # Number of trials
+	local hw_p     # Probability of success
 	hw_prob_data = [pdf(Binomial(hw_n, p), hw_x) for p in hw_p_grid]
 	hw_prob_prior = [p < 0.5 ? 0 : 1 for p in hw_p_grid]
 	hw_posterior = hw_prob_data .* hw_prob_prior
@@ -144,47 +173,25 @@ begin
 	scatter(hw_p_grid, hw_posterior, title="Posterior probability")
 end
 
-# ╔═╡ e130de89-9486-45c2-aca5-c39eb4d3d7a0
-#3
-# 89th percentile
-sort(posterior_uninfprior)[Int(round((length(posterior_uninfprior)+1) * (89/100), digits=0))]
-
 # ╔═╡ cf6b6a0b-aa16-4a2d-945a-f1ea22fb9550
 quantile(hw_posterior, 0.89)
-
-# ╔═╡ f9090e56-b6e7-4f75-a629-5937f82395ce
-
-
-# ╔═╡ 1f391ed3-750c-4458-a27b-7870ef7e53ec
-
-
-# ╔═╡ d39dbbba-d9f2-4f78-bb00-4611a6f16412
-
-
-# ╔═╡ f434daf6-fc2c-4a1c-8f26-2298f35ca80c
-
-
-# ╔═╡ 22cdf20b-beec-4d5e-b019-ccf1f5394110
-
 
 # ╔═╡ Cell order:
 # ╠═4178b5c3-0eab-461c-827f-a3fac25eae10
 # ╠═91d393ae-6e1c-11ec-0b79-29498ea4283d
+# ╠═ba7d3205-b77c-46e6-b055-6c0c48a783a5
+# ╠═ff97beeb-deea-4937-876b-a19604299099
 # ╠═137bc5ea-ae97-491e-8c1a-66be074752cc
+# ╠═43eab4cb-701e-491e-87c2-45225be9eeed
+# ╠═220380ea-ffe8-4b8a-aaa7-dff285b27cdc
 # ╠═0fba150d-9d96-45ae-8f37-bdfd989ebd41
+# ╠═2a9c23a1-7863-4cad-9b18-9b1acdfe6e52
 # ╠═b46dd645-b71f-4617-a55a-46ad0a5808f4
 # ╠═ec5ac06d-4a16-4233-891c-492be23745ba
-# ╠═4e4fca93-2bd5-4aa0-9acf-a5a930b431c8
 # ╠═6067730e-f2cd-4092-aebd-1befa909f68e
 # ╠═1278c7d4-f5db-401c-923a-fdef994d8e36
 # ╠═b85c0a56-fab5-40d6-a740-601b500e9fd7
 # ╠═239d1f5a-6916-408c-a053-b7aa8b093e05
 # ╠═77bbf84d-9a11-4249-b61f-8f10c7d3f50b
 # ╠═25d5b189-364d-46d0-8b9d-24acbaf82157
-# ╠═e130de89-9486-45c2-aca5-c39eb4d3d7a0
 # ╠═cf6b6a0b-aa16-4a2d-945a-f1ea22fb9550
-# ╠═f9090e56-b6e7-4f75-a629-5937f82395ce
-# ╠═1f391ed3-750c-4458-a27b-7870ef7e53ec
-# ╠═d39dbbba-d9f2-4f78-bb00-4611a6f16412
-# ╠═f434daf6-fc2c-4a1c-8f26-2298f35ca80c
-# ╠═22cdf20b-beec-4d5e-b019-ccf1f5394110
