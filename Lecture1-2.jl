@@ -169,16 +169,30 @@ begin
 	hw_prob_data = [pdf(Binomial(hw_n, p), hw_x) for p in hw_p_grid]
 	hw_prob_prior = [p < 0.5 ? 0 : 1 for p in hw_p_grid]
 	hw_posterior = hw_prob_data .* hw_prob_prior
-	hw_prop_quantile = quantile(hw_posterior, 0.89)
 	hw_posterior = hw_posterior ./ sum(hw_posterior)
 	scatter(hw_p_grid, hw_posterior, title="Posterior probability")
 end
 
-# ╔═╡ cf6b6a0b-aa16-4a2d-945a-f1ea22fb9550
-hw_prop_quantile
-
 # ╔═╡ f5a8b005-9f3b-4be2-813c-966df2b3e6d6
+# Since posterior are the probabilities of particular rate of successes, the percentile value must be for the actual rate of successes. I see no other way to get that value than to sample according to what posterior is.
+sampled_data = [sample(p_grid, Weights(hw_posterior)) for i in 1:1000]
 
+# ╔═╡ 3e66f515-35cd-472a-bfe7-d6f5171c2795
+begin
+	alpha_conf = 1-0.89
+	lower_idx = Int(round((alpha_conf / 2) * length(sampled_data)))
+	upper_idx = Int(round((1 - alpha_conf / 2) * length(sampled_data)))
+	data = sort(sampled_data)
+	q_lower = data[lower_idx]
+	q_upper = data[upper_idx]
+end
+
+# ╔═╡ 06d8e8a9-e891-4ba5-b8a6-39a191e4c110
+begin
+	scatter(hw_p_grid, hw_posterior, title="Posterior probability")
+	# Simplest way is to mark interval with vertical line
+	vline!([q_lower, q_upper], color=:red)
+end
 
 # ╔═╡ Cell order:
 # ╠═4178b5c3-0eab-461c-827f-a3fac25eae10
@@ -198,5 +212,6 @@ hw_prop_quantile
 # ╠═239d1f5a-6916-408c-a053-b7aa8b093e05
 # ╠═77bbf84d-9a11-4249-b61f-8f10c7d3f50b
 # ╠═25d5b189-364d-46d0-8b9d-24acbaf82157
-# ╠═cf6b6a0b-aa16-4a2d-945a-f1ea22fb9550
 # ╠═f5a8b005-9f3b-4be2-813c-966df2b3e6d6
+# ╠═3e66f515-35cd-472a-bfe7-d6f5171c2795
+# ╠═06d8e8a9-e891-4ba5-b8a6-39a191e4c110
