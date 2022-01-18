@@ -243,7 +243,7 @@ Pr(twins2|twins1) =  0.025 / 0.15 = 0.166.. ~= 0.17
 # ╔═╡ c3eb1478-7b26-44c2-a25a-be0341323077
 #2H2
 md"""
-Same as above but this time Pr(speciesA) and only first birth we see is twins
+Same as above but this time Pr(speciesA|twins1) and only first birth we see is twins
 
 Species A 0.1 * 0.5 = 0.05
 Species B 0.2 * 0.5 = 0.1
@@ -280,11 +280,29 @@ Pr(speciesA|no_twins2) = 0.9*1/3 / 5/6 = 0.3 * 6/5 = 0.36
 # ╔═╡ 049d756c-88a0-4daa-befb-5b079cd8dfa1
 # 2H4
 md"""
+What we want to know
+
+1. Posterior Pr(speciesA) ignoring data only using test
+2. Posterior Pr(speciesA) with data
+
+Pr(test A| A) = 0.8
+Pr(test A| B) = 1-0.65 = 0.35 because 65% correctly identifies species B
+
+Since this is the first update assume equal chance of species A or B
+P(A∣B)= P(B|A)P(A)/P(B)
+
+P(testA|speciesA) = P(speciesA|testA)P(testA)/P(speciesA)
+
+P(testA|speciesA)*P(speciesA) = P(speciesA|testA)P(testA)
+
+P(speciesA|testA) = P(testA|speciesA)*P(speciesA) / P(testA)
+
+P(speciesA|testA) = 0.8 * 0.5 / ((0.8*0.5)+(0.35*0.5)) ~= 0.7
+
+Now with prior from previous excercise
+P(speciesA|testA) = 0.8 * 0.36 / ((0.8*0.36)+((1-0.36)*0.35)) = 0.5625
 
 """
-
-# ╔═╡ d525912d-6acb-4c03-8811-354330cb2f58
-
 
 # ╔═╡ Cell order:
 # ╠═54e4c02a-75e8-11ec-15a2-750ac5013cc1
@@ -306,4 +324,3 @@ md"""
 # ╠═c3eb1478-7b26-44c2-a25a-be0341323077
 # ╠═b2dec454-cc3a-47a8-8371-879f905c344d
 # ╠═049d756c-88a0-4daa-befb-5b079cd8dfa1
-# ╠═d525912d-6acb-4c03-8811-354330cb2f58
