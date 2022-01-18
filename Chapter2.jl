@@ -207,9 +207,83 @@ So 6/8 ways to produce first black and second white
 """
 
 # ╔═╡ 0d8e3e8e-dd5b-47ed-bf9a-b96d725844c3
+# 2H1
+md"""
+What we know
 
+- Two species of panda A and B
+- Pandas A gives twins 10% of time otherwise single infant
+- Pandas B gives twins 20% of time otherwise single infant
 
-# ╔═╡ d45b92ac-8d25-41ef-a12e-07fdf1258e03
+Question we have unknown species panda and she gave birth to twins, what is that next will also be twins
+
+Counting method
+
+Species A 0.1 ways first time * 0.1 ways second time = 0.01
+Species B 0.2 ways first time * 0.2 ways second time = 0.04
+But we have a prior that each species is equally likely so each is 0.5
+
+0.01*0.5 + 0.04*0.5 = 0.025 ways
+
+But question is about Pr of second time twins, conditional on first, so
+
+Pr(A,K) = P(A)*P(K|A)
+
+Pr(K|A) = Pr(A,K) / P(A)
+
+Pr(twins2|twins1) = Pr(twins1,twins2) / Pr(twins1)
+
+Pr(twins1,twins2) = 0.025
+Pr(twins1) = 0.1 * 0.5 + 0.2*0.5 = 0.15
+
+Pr(twins2|twins1) =  0.025 / 0.15 = 0.166.. ~= 0.17
+
+"""
+
+# ╔═╡ c3eb1478-7b26-44c2-a25a-be0341323077
+#2H2
+md"""
+Same as above but this time Pr(speciesA) and only first birth we see is twins
+
+Species A 0.1 * 0.5 = 0.05
+Species B 0.2 * 0.5 = 0.1
+
+0.05/(0.05+0.1) = 0.05/0.15 = 1/3
+"""
+
+# ╔═╡ b2dec454-cc3a-47a8-8371-879f905c344d
+#2H3
+md"""
+Connected with above but this time second birth is not twins, Pr(speciesA)
+
+So we are asking question Pr(speciesA|twins1,no_twins2)
+Lacking information is Pr(speciesA|no_twins2)
+
+Pr(speciesA|no_twins2) = Pr(no_twins2|speciesA)Pr(speciesA)/Pr(no_twins2)
+
+Pr(no_twins2|speciesA) = 1-0.1 = 0.9
+Pr(no_twins2|speciesB) = 1-0.2 = 0.8
+
+Pr(no_twins2) = Pr(no_twins2|speciesA)Pr(speciesA) + Pr(no_twins2|speciesB)Pr(speciesB)
+
+Catch here is that questions asks about **posterior** and what we assumed about species probility first was equal chances of 0.5, but that has changed once we computed posterior with first update, and new species probabilities are different.
+
+From the previous Pr(speciesA|twins1) = 1/3 meaning that on first step our prior is 1/3 to be species A and it must be 1-1/3 = 2/3 to see species B because there are only two species.
+
+Therefore, completing equation we get next update for another sample no-twins as follow
+
+Pr(no_twins2) = 0.9*1/3 + 0.8*2/3 = 2.5/3 = 5/6
+
+Pr(speciesA|no_twins2) = 0.9*1/3 / 5/6 = 0.3 * 6/5 = 0.36
+"""
+
+# ╔═╡ 049d756c-88a0-4daa-befb-5b079cd8dfa1
+# 2H4
+md"""
+
+"""
+
+# ╔═╡ d525912d-6acb-4c03-8811-354330cb2f58
 
 
 # ╔═╡ Cell order:
@@ -229,4 +303,7 @@ So 6/8 ways to produce first black and second white
 # ╠═0d42bb17-1ce3-4410-af8b-cc87937dd7b5
 # ╠═d7729a6e-000e-4ba0-acc7-218e11287472
 # ╠═0d8e3e8e-dd5b-47ed-bf9a-b96d725844c3
-# ╠═d45b92ac-8d25-41ef-a12e-07fdf1258e03
+# ╠═c3eb1478-7b26-44c2-a25a-be0341323077
+# ╠═b2dec454-cc3a-47a8-8371-879f905c344d
+# ╠═049d756c-88a0-4daa-befb-5b079cd8dfa1
+# ╠═d525912d-6acb-4c03-8811-354330cb2f58
