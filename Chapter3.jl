@@ -11,23 +11,21 @@ begin
     Pkg.activate(mktempdir())
 
     Pkg.add([
-        Pkg.PackageSpec(name="Plots"),
         Pkg.PackageSpec(name="StatsBase"),
-		Pkg.PackageSpec(name="StatsPlots"),
 		Pkg.PackageSpec(name="Turing"),
 		Pkg.PackageSpec(name="PlutoUI"),
 		Pkg.PackageSpec(name="CSV"),
 		Pkg.PackageSpec(name="DataFrames"),
+		Pkg.PackageSpec(name="CairoMakie")
 		
     ])
-	
-    using Plots
 	using StatsBase
-	using StatsPlots
 	using Turing
 	using PlutoUI
 	using CSV
 	using DataFrames
+	using CairoMakie
+	CairoMakie.activate!(type = "svg")
 end
 
 # ╔═╡ d74b4314-1fa0-47d0-a5bc-09377dc41e5d
@@ -40,7 +38,7 @@ begin
 end
 
 # ╔═╡ 7636881c-2af3-4b5a-9a90-16dca35a6747
-histogram(samples) # As many as 1000 people flip a coin 10000 with probability 0.5 of success
+hist(samples) # As many as 1000 people flip a coin 10000 with probability 0.5 of success
 
 # ╔═╡ 1bd4f35f-d529-4a34-a729-944120f62a57
 md"""
@@ -103,10 +101,12 @@ Showing relation between height and weight of children
 howell = CSV.read("Howell1.csv", DataFrame)
 
 # ╔═╡ 0e9e8888-5a48-41dd-b88c-a75f5ecd8a78
-begin
-	scatter(howell.height,howell.weight)
-	xlabel!("height (cm)")
-	ylabel!("weight (kg)")
+let
+	fig = Figure()
+	ax = Axis(fig[1, 1], xlabel = "Height", ylabel = "Weight",
+    title = "Howell dataset")
+	scatter!(howell.height,howell.weight)
+	fig
 end
 
 # ╔═╡ e8089a90-045d-4740-b875-113d387c9ab3
@@ -114,10 +114,12 @@ end
 adults = howell[howell.age .>= 18,:]
 
 # ╔═╡ 250c92db-ce49-4f39-a12a-2e53283b8753
-begin
-	scatter(adults.height,adults.weight)
-	xlabel!("height (cm)")
-	ylabel!("weight (kg)")
+let
+	fig = Figure()
+	ax = Axis(fig[1, 1], xlabel = "Height [cm]", ylabel = "Weight [kg]",
+    title = "Howell dataset >= 18 age")
+	scatter!(adults.height,adults.weight)
+	fig
 end
 
 # ╔═╡ 2e1436c3-7a69-4e97-966e-5277d34a280c
@@ -158,9 +160,13 @@ let
 		y = (i.*β[j]) .+ α[j]
 		push!(lines,(i,y))
 	end
-	scatter(lines[1][1],lines[1][2])
+	fig = Figure()
+	ax = Axis(fig[1, 1], xlabel = "Height [cm]", ylabel = "Weight [kg]",
+    title = "Example")
+	scatter!(lines[1][1],lines[1][2])
 	scatter!(lines[2][1],lines[2][2])
 	scatter!(lines[3][1],lines[3][2])
+	fig
 end
 
 # ╔═╡ b4a4528c-4e5c-403a-9229-1c59eb4df1b9
@@ -198,9 +204,11 @@ begin
 	W = [rand(Normal(u,sigma)) for u in mu]
 
 	# Plot our simulated synthetic people
-	scatter(H,W)
-	xlabel!("simulated height (cm)")
-	ylabel!("simulated weight (cm)")
+	fig = Figure()
+	ax = Axis(fig[1, 1], xlabel = "Height [cm]", ylabel = "Weight [kg]",
+    title = "Simulated")
+	scatter!(H,W)
+	fig
 end
 
 # ╔═╡ 4a5233eb-58bb-41f8-beaf-d23cde3b8288
@@ -230,11 +238,15 @@ let
 	beta = rand(Normal(0,1), n_individuals)
 	points = collect(0:n_individuals)./n_individuals
 	f(x,α,β) = α.+β.*x 
-	plt = scatter()
+	fig = Figure()
+	ax = Axis(fig[1, 1], xlabel = "Height [cm]", ylabel = "Weight [kg]",
+    title = "Lines")
+	xlims!(ax, -100, 100)
+	ylims!(ax, -100, 100)
 	for i in 2:n_individuals
-		Plots.abline!(alpha[i],beta[i])
+		abline!(ax,alpha[i],beta[i])
 	end
-	plt
+	fig
 end
 
 # ╔═╡ c12bd5e1-7646-4703-961d-b842b156351b
@@ -259,13 +271,15 @@ let
 	beta = rand(Normal(0,10), n_individuals)
 	Hseq = collect(range(130,170,length=30))
 	Hbar = mean(Hseq)
-	plt = scatter()
-	ylims!(10,100)
-	xlims!(130,170)
-	for i in 1:n_individuals
-		plot!(Hseq,alpha[i].+beta[i].*(Hseq.-Hbar))
+	fig = Figure()
+	ax = Axis(fig[1, 1], xlabel = "Height [cm]", ylabel = "Weight [kg]",
+    title = "Lines")
+	ylims!(ax, 10, 100)
+	xlims!(ax, 130, 170)
+	for i in 2:n_individuals
+		lines!(Hseq,alpha[i].+beta[i].*(Hseq.-Hbar))
 	end
-	plt
+	fig	
 end
 
 # ╔═╡ 8b7a662f-d9fa-43d8-bf0b-79643d1f97a2
@@ -282,17 +296,19 @@ let
 	beta = rand(LogNormal(0,1), n_individuals)
 	Hseq = collect(range(130,170,length=30))
 	Hbar = mean(Hseq) 
-	plt = scatter()
-	ylims!(10,100)
-	xlims!(130,170)
-	for i in 1:n_individuals
-		plot!(Hseq,alpha[i].+beta[i].*(Hseq.-Hbar))
+	fig = Figure()
+	ax = Axis(fig[1, 1], xlabel = "Height [cm]", ylabel = "Weight [kg]",
+    title = "Lines")
+	ylims!(ax, 10, 100)
+	xlims!(ax, 130, 170)
+	for i in 2:n_individuals
+		lines!(Hseq,alpha[i].+beta[i].*(Hseq.-Hbar))
 	end
-	plt
+	fig	
 end
 
 # ╔═╡ 5351a562-e0e1-4527-8312-d0be46536400
-histogram(rand(LogNormal(0,1), 100)) # it is always positive
+hist(rand(LogNormal(0,1), 100)) # it is always positive
 
 # ╔═╡ c3e5c772-5337-4a05-9952-c38c5eb1825e
 md"""
@@ -335,32 +351,44 @@ end
 # ╔═╡ 62822af0-7a8f-45ab-a71b-234aa9321e29
 chain = sample(model, NUTS(0.65), 5_000);
 
-# ╔═╡ 52952023-a1f3-4322-82a0-a8b3b27575d1
-plot(chain)
-
 # ╔═╡ 6ed1f638-ce27-4683-8c5c-9e285dcc0afc
 describe(chain)
 
-# ╔═╡ 7333c14b-d2fb-4188-bc4b-b0a721423203
+# ╔═╡ c459d3e4-1512-4560-979b-152a63ba58f6
 begin
-	# Skip warm-up and predict multiple targets for each set of sampled parameters
-	# Returned predictions are set of fitted lines, so must be averaged
-	function predict(chain, x; warmup=1000)
-		 p = get_params(chain[warmup:end])
-		 yhat = p.α' .+ (p.β' .* (H.-mean(H)))
+	warmup = 1000;
+	c = chain[warmup:end]
+	p = get_params(c)
+	p_hdp = hpd(c)
+	function predict(α,β,x)
+		α' .+ (β' .* (x.-mean(x)))
 	end
-	yhats = predict(chain,H)
-	yhat = mean(yhats, dims=2) # We could use this for plotting for the average line
+	yhat_avg=predict(mean(p.α),mean(p.β), H)
+	yhat_lower=predict(p_hdp[:α,:lower],p_hdp[:β,:lower], H)
+	yhat_upper=predict(p_hdp[:α,:upper],p_hdp[:β,:upper], H)
+	
+	df = DataFrame(H=H,W=W,yhat_avg=yhat_avg,yhat_lower=yhat_lower,yhat_upper=yhat_upper)
 end
 
-# ╔═╡ 171979d3-30fc-4d7a-8f5b-bc72659bd182
+# ╔═╡ 1a87039d-cb32-4428-8941-a4cf5f5cf44f
 begin
+	sort!(df,:H)
 	scatter(H,W)
-	scatter!(H,yhats, color=:red,legend = false)
+	plot!(df.H, df.yhat_avg,ribbon=(abs.(df.yhat_avg .- df.yhat_lower), abs.(df.yhat_upper .- df.yhat_avg)))
 end
 
-# ╔═╡ bbbdeb65-486a-4799-869d-fa925a3dfec2
-
+# ╔═╡ 4f588efd-7530-42a6-a340-c74c16ab7259
+let
+	fig = Figure()
+	ax = Axis(fig[1, 1], xlabel = "Height [cm]", ylabel = "Weight [kg]",
+    title = "Posterior")
+	ylims!(ax, 40, 100)
+	xlims!(ax, 130, 170)
+	scatter!(df.H,df.W)
+	lines!(df.H, df.yhat_avg)
+	band!(df.H,df.yhat_lower,df.yhat_upper)
+	fig	
+end
 
 # ╔═╡ Cell order:
 # ╠═b5995a3e-784d-11ec-2b4b-358722f2b5b8
@@ -392,8 +420,7 @@ end
 # ╠═3ddb17de-7fa7-424d-9f9a-4cd01a682311
 # ╠═a9f05e82-7f2e-4397-93b9-e73e5dde71a5
 # ╠═62822af0-7a8f-45ab-a71b-234aa9321e29
-# ╠═52952023-a1f3-4322-82a0-a8b3b27575d1
 # ╠═6ed1f638-ce27-4683-8c5c-9e285dcc0afc
-# ╠═7333c14b-d2fb-4188-bc4b-b0a721423203
-# ╠═171979d3-30fc-4d7a-8f5b-bc72659bd182
-# ╠═bbbdeb65-486a-4799-869d-fa925a3dfec2
+# ╠═c459d3e4-1512-4560-979b-152a63ba58f6
+# ╠═1a87039d-cb32-4428-8941-a4cf5f5cf44f
+# ╠═4f588efd-7530-42a6-a340-c74c16ab7259
