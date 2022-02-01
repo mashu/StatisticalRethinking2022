@@ -179,6 +179,121 @@ end
 # Using widest interval that exclude a value. Also if distributions are not skewed, percentile interval would be very similar to compatibility interval shown by a HPDI
 
 # ╔═╡ 8ed3b901-32f2-4fc3-a64f-e02a67161601
+p_grid[argmax(posterior_skewed)],p_grid[argmax(posterior)]
+
+# ╔═╡ ff6b5ce3-109d-4e8a-b32f-bc327ff1b422
+# Approximate this point by computing mode(..) if you sampled
+begin
+	samples_skewed = sample(p_grid, Weights(posterior_skewed), 10000)
+	mode(samples_skewed)
+end
+# But why not median, mean?
+# Use loss function to decide, different losses suggest different point estimate median or mean
+
+# ╔═╡ c6ffc1b0-afac-4a6d-b419-4406f2441175
+# Code 3.20
+pdf.(Binomial(2,0.7),0:2)
+# There is 9% chance of observing water 1x, 42% chance of observing water 2x, and 49% chance of observing water 3x, this is likelihood the probability of data given parameters
+
+# ╔═╡ 4bf1c4d9-7a22-4808-b2c2-63e7fd2f88a2
+# Code 3.21-3.22
+# We can sample 10 random draws using these probabilities
+sample(0:2,Weights(pdf(Binomial(2,0.7))), 10)
+
+# ╔═╡ 86dffa2e-08ea-440c-a8f5-4beafeae2d5f
+# Helper function for calculating frequencies for code 3.23
+function frequency(x)
+	d = Dict{Int,Float64}()
+	for v in x
+		if !haskey(d,v)
+			d[v] = (1 /length(x))
+		else
+			d[v] += (1 /length(x))
+		end
+	end
+	return d
+end
+
+# ╔═╡ d86336c1-847d-432a-8851-ad4b83d68c27
+begin
+	# Code 3.23
+	# Sample 100 000 to verify that each draw appears in proportion to its liklihood
+	x = sample(0:2,Weights(pdf(Binomial(2,0.7))), 100000);
+	println(frequency(x))
+	x = sample(0:9,Weights(pdf(Binomial(9,0.7))), 100000); # Sample posterior
+	hist(x)
+end
+
+# ╔═╡ 31c8da03-4979-4f5e-9a4d-b72df4cbcf52
+# Secondly to propagate perameter uncertainty into these predictions (samples) replace value 0.6 with samples from posterior (but these need to be frequencies since)
+begin 
+	freq = frequency(x)
+	values = Vector{Float64}()
+	for i in 0:length(freq)-1
+		push!(values,freq[i])
+	end
+	v = sample(0:9,Weights(values),10000)
+	hist(v) # posterior predictive
+end
+
+# ╔═╡ eef6719f-e312-4e74-ae5e-1c1b040eabe5
+md"""
+# Practice
+"""
+
+# ╔═╡ e80d6253-2eba-4f82-97bb-271425c8d52c
+begin
+	ex_p_grid = collect(0.001:0.001:1)
+	ex_prior = ones(1000)
+	ex_likelihood = [pdf(Binomial(9,p),6) for p in ex_p_grid]
+	ex_posterior = ex_likelihood .* ex_prior
+	ex_posterior = ex_posterior ./ sum(ex_posterior)
+	ex_samples = sample(ex_p_grid, Weights(ex_posterior), 10000)
+end
+
+# ╔═╡ 639e0476-0341-4626-82cb-8157fa3d2055
+#3E1-3
+
+# ╔═╡ ad752a33-e193-4691-80ac-48474a80b2e1
+sum(ex_posterior[p_grid .< 0.2])
+
+# ╔═╡ dd0c00bf-3495-4b7a-908c-ec7293e0b740
+sum(ex_samples .< 0.2) / length(ex_samples)
+
+# ╔═╡ a032da55-8d23-4cbd-820f-8a07b6dabe4a
+sum(ex_posterior[p_grid .> 0.8])
+
+# ╔═╡ 5b038ac1-307d-4d82-95d5-c3d958b05114
+sum(ex_samples .> 0.8) / length(ex_samples)
+
+# ╔═╡ feaa72da-c04c-4899-b80e-255531bb0a63
+sum(ex_posterior[(p_grid .< 0.8) .& (p_grid .> 0.2)])
+
+# ╔═╡ 51f28530-702b-448c-8b10-1dc06a9a72a3
+sum((ex_samples .< 0.8) .& (ex_samples .> 0.2))/length(ex_samples)
+
+# ╔═╡ 6cce67d0-2882-43d5-9f6b-993166830c27
+#3E4-5
+
+# ╔═╡ 0f41342f-60d3-40d4-8237-9df41375b186
+sum(ex_samples .< quantile(ex_samples, 0.2)) / length(ex_samples)
+
+# ╔═╡ 442d5ebd-b693-4e4b-963e-59a8f6c47091
+sum(ex_samples .> quantile(ex_samples, 0.2)) / length(ex_samples)
+
+# ╔═╡ c239f5d3-0a54-43ac-ba25-1ce9a2018d94
+#3E6-7
+
+# ╔═╡ ad8ac0cd-0710-477b-bf42-f30129410fb5
+hpdi(ex_samples, alpha=0.66)
+
+# ╔═╡ 64aca326-eb1a-4644-b68a-9dcea9951353
+begin
+	side = (1-0.66)/2
+	quantile(ex_samples, [side,1-side])
+end
+
+# ╔═╡ f2bd6a45-090e-4e52-9ff6-c32767832cc6
 
 
 # ╔═╡ Cell order:
@@ -200,3 +315,25 @@ end
 # ╠═402b57bf-9be8-4a60-94ef-525649944c85
 # ╠═045fb832-c8f0-4e9d-9a6f-3f98960bc6c1
 # ╠═8ed3b901-32f2-4fc3-a64f-e02a67161601
+# ╠═ff6b5ce3-109d-4e8a-b32f-bc327ff1b422
+# ╠═c6ffc1b0-afac-4a6d-b419-4406f2441175
+# ╠═4bf1c4d9-7a22-4808-b2c2-63e7fd2f88a2
+# ╠═86dffa2e-08ea-440c-a8f5-4beafeae2d5f
+# ╠═d86336c1-847d-432a-8851-ad4b83d68c27
+# ╠═31c8da03-4979-4f5e-9a4d-b72df4cbcf52
+# ╠═eef6719f-e312-4e74-ae5e-1c1b040eabe5
+# ╠═e80d6253-2eba-4f82-97bb-271425c8d52c
+# ╠═639e0476-0341-4626-82cb-8157fa3d2055
+# ╠═ad752a33-e193-4691-80ac-48474a80b2e1
+# ╠═dd0c00bf-3495-4b7a-908c-ec7293e0b740
+# ╠═a032da55-8d23-4cbd-820f-8a07b6dabe4a
+# ╠═5b038ac1-307d-4d82-95d5-c3d958b05114
+# ╠═feaa72da-c04c-4899-b80e-255531bb0a63
+# ╠═51f28530-702b-448c-8b10-1dc06a9a72a3
+# ╠═6cce67d0-2882-43d5-9f6b-993166830c27
+# ╠═0f41342f-60d3-40d4-8237-9df41375b186
+# ╠═442d5ebd-b693-4e4b-963e-59a8f6c47091
+# ╠═c239f5d3-0a54-43ac-ba25-1ce9a2018d94
+# ╠═ad8ac0cd-0710-477b-bf42-f30129410fb5
+# ╠═64aca326-eb1a-4644-b68a-9dcea9951353
+# ╠═f2bd6a45-090e-4e52-9ff6-c32767832cc6
